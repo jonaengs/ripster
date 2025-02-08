@@ -1,10 +1,10 @@
-import './App.css'
+import { Scanner } from './Scanner'
 
 function App() {
-  return (
-    <>
-    </>
-  )
+  const route = window.location.pathname
+  console.log(route)
+
+  return <Scanner />
 }
 
 export default App
