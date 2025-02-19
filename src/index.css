@@ -1,3 +1,8 @@
+#songForm{
+    font-size: medium;
+    border-style: dotted;
+    border-color: green;   
+}
 
 body {
     font-family: sans-serif;
