@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 
-
-interface Entry {
+export interface Entry {
   id: string;
   url: string;
   title: string;
@@ -17,6 +16,7 @@ function Studio() {
 
   const [entries, setEntries] = useLocalStorage<Entry[]>('entries', [])
   const [printMode, setPrintMode] = useState(false)
+  const [showSongInfo, setShowSongInfo] = useState(false)
 
   const [undoStack, setUndoStack] = useState<Entry[]>([])
 
@@ -61,24 +61,27 @@ function Studio() {
     
     {!printMode && <Form addEntry={addEntry} />}
 
-    <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
-      {entries.map((e) => <Card deleteEntry={deleteEntry} entry={e} key={e.id}></Card>)}
 
-    </div>
+    <br />
+    <button onClick={() => setShowSongInfo(!showSongInfo)}>Show/hide song info</button>
+    {entries.map((e) => <ListInfo deleteEntry={deleteEntry} showAllInfo={showSongInfo} entry={e} key={e.id}></ListInfo>)}
+
     
     </>
   )
 }
 
-function Card({entry, deleteEntry}: {entry: Entry, deleteEntry: (entry: Entry) => void}){
-  const [showRemove, setShowRemove] = useState(false)
+
+function ListInfo({entry, deleteEntry, showAllInfo} :{entry: Entry, deleteEntry: (entry: Entry) => void, showAllInfo: boolean}){
+  
   return(
-    <div onMouseEnter={() => setShowRemove(true)} onMouseLeave={() => setShowRemove(false)} style={{display: 'flex', flexDirection: 'column', alignItems: 'center', border: '3px solid black', width: '148px', height: '286px'}}>
-    <QRCodeCanvas style={{margin: '10px'}} value={entry.url}></QRCodeCanvas>
-    <p style={{marginTop: '14px', marginBottom: '5px'}}>{entry.artist}</p>
-    <p style={{fontSize: '30px', margin: '5px'}}>{entry.year}</p>
-    <p style={{marginTop: '5px', marginBottom: '5px'}}>{entry.title}</p>
-    <button style={{display: showRemove ? 'block' : 'none'}} onClick={() => deleteEntry(entry)}>remove</button>
+    <div>
+      <p>{entry.title}</p>
+      {showAllInfo &&
+      <p> {entry.artist} | {entry.year} | <a href={entry.url} >spotify link</a> </p>
+      }
+      <button onClick={() => deleteEntry(entry)}>remove</button>
+
     </div>
   )
 }

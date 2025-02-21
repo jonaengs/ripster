@@ -1,3 +1,4 @@
+import { Print } from './Print'
 import { Scanner } from './Scanner'
 import Studio from './Studio'
 
@@ -8,6 +9,9 @@ function App() {
   }
   if (route === '/studio') {
     return <Studio />
+  }
+  if (route === '/print') {
+    return <Print />
   }
 
 
