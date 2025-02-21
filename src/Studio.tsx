@@ -15,27 +15,19 @@ interface Entry {
 
 function Studio() {
 
-  const [savedEntries, setSavedEntries] = useLocalStorage<Entry[]>('entries', [])
-
-
-  const [entries, setEntries] = useState<Entry[]>(savedEntries);
+  const [entries, setEntries] = useLocalStorage<Entry[]>('entries', [])
   const [printMode, setPrintMode] = useState(false)
 
-
   const [undoStack, setUndoStack] = useState<Entry[]>([])
-
-
 
   const addEntry = (entry: Entry) => {
     const updated = [...entries, entry]
     setEntries(updated)
-    setSavedEntries(updated)
   }
 
   function deleteEntry(entry: Entry){
     const updated = entries.filter(e => e.id !== entry.id)
     setEntries(updated)
-    setSavedEntries(updated)
     setUndoStack([...undoStack, entry])
   }
 
@@ -45,20 +37,12 @@ function Studio() {
       
       if (entry){
         setEntries([...entries, entry])
-        setSavedEntries([...savedEntries, entry])
       }
     }
   }
 
   function exportEntries(){
-    const data = entries.map(e => ({
-      id: e.id,
-      url: e.url,
-      title: e.title,
-      artist: e.artist,
-      year: e.year
-    }))
-    const json = JSON.stringify(data)
+    const json = JSON.stringify(entries)
     const blob = new Blob([json], {type: 'application/json'})
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
