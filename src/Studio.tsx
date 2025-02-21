@@ -1,10 +1,9 @@
 import { useLocalStorage } from '@uidotdev/usehooks';
-import { QRCodeCanvas } from 'qrcode.react';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 
-export interface Entry {
+export interface SongEntry {
   id: string;
   url: string;
   title: string;
@@ -14,18 +13,18 @@ export interface Entry {
 
 function Studio() {
 
-  const [entries, setEntries] = useLocalStorage<Entry[]>('entries', [])
-  const [printMode, setPrintMode] = useState(false)
+  const [entries, setEntries] = useLocalStorage<SongEntry[]>('entries', [])
   const [showSongInfo, setShowSongInfo] = useState(false)
 
-  const [undoStack, setUndoStack] = useState<Entry[]>([])
+  const [undoStack, setUndoStack] = useState<SongEntry[]>([])
 
-  const addEntry = (entry: Entry) => {
+
+  const addEntry = (entry: SongEntry) => {
     const updated = [...entries, entry]
     setEntries(updated)
   }
 
-  function deleteEntry(entry: Entry){
+  function deleteEntry(entry: SongEntry){
     const updated = entries.filter(e => e.id !== entry.id)
     setEntries(updated)
     setUndoStack([...undoStack, entry])
@@ -53,46 +52,50 @@ function Studio() {
   }
 
   return (
-    <>
-    <label htmlFor="printMode">Print mode</label>
-    <input id='printMode' type="checkbox" checked={printMode} onClick={() => setPrintMode(!printMode)}/>
+    <div id='studio'>
     <button onClick={exportEntries}>export</button>
-    <button onClick={undoDelete}>undo</button>
     
-    {!printMode && <Form addEntry={addEntry} />}
+    <Form addEntry={addEntry} />
 
 
     <br />
     <button onClick={() => setShowSongInfo(!showSongInfo)}>Show/hide song info</button>
-    {entries.map((e) => <ListInfo deleteEntry={deleteEntry} showAllInfo={showSongInfo} entry={e} key={e.id}></ListInfo>)}
+    {undoStack.length > 0 && <button onClick={undoDelete}>undo deletion</button>}
+    <br />
+    <br />
+    {entries.map((e) => <SongItem deleteEntry={deleteEntry} showAllInfo={showSongInfo} entry={e} key={e.id}></SongItem>)}
 
     
-    </>
+    </div>
   )
 }
 
 
-function ListInfo({entry, deleteEntry, showAllInfo} :{entry: Entry, deleteEntry: (entry: Entry) => void, showAllInfo: boolean}){
+function SongItem({entry, deleteEntry, showAllInfo} :{entry: SongEntry, deleteEntry: (entry: SongEntry) => void, showAllInfo: boolean}){
   
   return(
-    <div>
-      <p>{entry.title}</p>
-      {showAllInfo &&
-      <p> {entry.artist} | {entry.year} | <a href={entry.url} >spotify link</a> </p>
-      }
-      <button onClick={() => deleteEntry(entry)}>remove</button>
+    <div style={{ margin: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <p style={{ margin: 0 }}>{entry.title}</p>
 
+      {showAllInfo &&
+        <span> | {entry.artist} | {entry.year} | <a href={entry.url} >spotify link</a> </span>}
+
+        <button className="studio-button" onClick={() => deleteEntry(entry)}>delete</button>
+      </div>
+      
+      
     </div>
   )
 }
 
 
 
-function Form({addEntry}: {addEntry: (entry: Entry) => void}) {
+function Form({addEntry}: {addEntry: (entry: SongEntry) => void}) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget
-    const entry: Entry = {
+    const entry: SongEntry = {
       id: uuidv4(),
       url: (form.elements.namedItem('url') as HTMLInputElement).value,
       title: (form.elements.namedItem('title') as HTMLInputElement).value,
@@ -100,20 +103,21 @@ function Form({addEntry}: {addEntry: (entry: Entry) => void}) {
       year: (form.elements.namedItem('year') as HTMLInputElement).value
     }
     addEntry(entry)
+    form.reset()
   }
   return (
     <form id='songForm' onSubmit={handleSubmit}>
       <label htmlFor="url">url</label>
-      <input type="text" id="url" required/>
+      <input type="text" name="url" required/>
       <br />
       <label htmlFor="title">title</label>
-      <input type="text" id="title" required/>
+      <input type="text" name="title" required/>
       <br />
       <label htmlFor="artist">artist</label>
-      <input type="text" id="artist" required/>
+      <input type="text" name="artist" required/>
       <br />
       <label htmlFor="year">year</label>
-      <input type="text" id="year" required/>
+      <input type="text" name="year" required/>
       <br />
       <button type="submit">Submit</button>
     </form>
