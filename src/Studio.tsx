@@ -19,12 +19,12 @@ function Studio() {
 
 
   const addEntry = (entry: SongEntry) => {
-    const updated = [...entries, entry]
-    setEntries(updated)
+    setEntries(entries => [...entries, entry])
   }
 
+
   function deleteEntry(entry: SongEntry){
-    const updated = entries.filter(e => e.id !== entry.id)
+    const updated = entries.filter(e => e.url !== entry.url)
     setEntries(updated)
     setUndoStack([...undoStack, entry])
   }
@@ -50,9 +50,34 @@ function Studio() {
     URL.revokeObjectURL(url)
   }
 
+  function readData(uploadedFile: Blob) : Promise<SongEntry[]> {
+    return new Promise((resolve, reject) => {
+      const fr = new FileReader()
+      fr.onload = () => {
+        resolve(JSON.parse(fr.result as string))
+      }
+      fr.onerror = reject
+  
+      fr.readAsText(uploadedFile)
+    })
+  }
+
   return (
     <div id='studio'>
     <button onClick={exportEntries}>export</button>
+    <br />
+    <label htmlFor='import'>import</label>
+    <input type="file" name='import' onChange={(e) => { 
+      const files = e.target.files
+      if (files){
+        readData(files[0]).then(e => {
+          const urls = entries.map(e => e.url)
+          e = e.filter(entry => !urls.includes(entry.url))
+          setEntries([...entries, ...e])
+        })
+
+      }
+      }}/>
     
     <Form addEntry={addEntry} />
 
