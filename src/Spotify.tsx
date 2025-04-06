@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { PrintableSong } from './Print';
 import { useLocalStorage } from '@uidotdev/usehooks';
+import { SongEntry } from './Studio';
+import { Routes } from './App';
 
 const SPOTIFY_CLIENT_ID = '309330d9a9df4450bb1bc8f9b7d45157';
 const REDIRECT_URI = 'https://ripster.pages.dev/spotify';
@@ -25,13 +26,13 @@ interface SpotifyTrack {
  * 1. It only fetches the user's first 50 playlists (by whatever ordering Spotify uses)
  * 2. It only fetches the first 250 tracks from the chosen playlist (again, by whatever ordering Spotify uses)
  */
-const SpotifyInner = ({setSongs}: {setSongs: (songs: PrintableSong[]) => void}) => {
+const SpotifyInner = ({setSongs}: {setSongs: (songs: SongEntry[]) => void}) => {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [playlists, setPlaylists] = useState<PlayList[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  function trackToPrintableSong(track: SpotifyTrack): PrintableSong {
+  function trackToSongEntry(track: SpotifyTrack): SongEntry {
     return {
       url: track.href,
       title: track.name,
@@ -109,7 +110,7 @@ const SpotifyInner = ({setSongs}: {setSongs: (songs: PrintableSong[]) => void}) 
         setLoading(false);
       }
       setSongs(
-        fetchedTracks.map(trackToPrintableSong)
+        fetchedTracks.map(trackToSongEntry)
       )
     }
   }
@@ -162,13 +163,11 @@ const SpotifyInner = ({setSongs}: {setSongs: (songs: PrintableSong[]) => void}) 
 }
 
 export const Spotify = () => {
-  // TODO: This is invalid as this actually reads entries, which are required to have an ID
-  // However, we're removing the ids very soon, so I'll leave it like this for now
-  const [, setSongs] = useLocalStorage<PrintableSong[]>('entries', [])
+  const [, setSongs] = useLocalStorage<SongEntry[]>('entries', [])
 
-  function onSetSongs(songs: PrintableSong[]) {
+  function onSetSongs(songs: SongEntry[]) {
     setSongs(songs)
-    window.location.replace('/print')
+    window.location.replace(Routes.studio)
   }
 
   return <SpotifyInner setSongs={onSetSongs} />

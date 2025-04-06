@@ -2,7 +2,7 @@ import { useLocalStorage } from "@uidotdev/usehooks"
 import { SongEntry } from "./Studio"
 import { QRCodeCanvas } from "qrcode.react"
 
-export type PrintableSong = Omit<SongEntry, "id">
+export type PrintableSong = SongEntry
 
 export const Print = () => {
     const [entries, ] = useLocalStorage<SongEntry[]>('entries', [])

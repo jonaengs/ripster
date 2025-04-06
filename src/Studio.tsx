@@ -1,10 +1,9 @@
 import { useLocalStorage } from '@uidotdev/usehooks';
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
 
 export interface SongEntry {
-  id: string;
+  /** url is used to uniquely identify a song */
   url: string;
   title: string;
   artist: string;
@@ -70,12 +69,11 @@ function Studio() {
     <input type="file" name='import' onChange={(e) => { 
       const files = e.target.files
       if (files){
-        readData(files[0]).then(e => {
-          const urls = entries.map(e => e.url)
-          e = e.filter(entry => !urls.includes(entry.url))
-          setEntries([...entries, ...e])
+        readData(files[0]).then(newEntries => {
+          const urls = new Set(entries.map(e => e.url))
+          newEntries = newEntries.filter(entry => !urls.has(entry.url))
+          setEntries([...entries, ...newEntries])
         })
-
       }
       }}/>
     
@@ -87,7 +85,7 @@ function Studio() {
     {undoStack.length > 0 && <button onClick={undoDelete}>undo deletion</button>}
     <br />
     <br />
-    {entries.map((e) => <SongItem deleteEntry={deleteEntry} showAllInfo={showSongInfo} entry={e} key={e.id}></SongItem>)}
+    {entries.map((e) => <SongItem deleteEntry={deleteEntry} showAllInfo={showSongInfo} entry={e} key={e.url}></SongItem>)}
 
     
     </div>
@@ -120,7 +118,6 @@ function Form({addEntry}: {addEntry: (entry: SongEntry) => void}) {
     e.preventDefault();
     const form = e.currentTarget
     const entry: SongEntry = {
-      id: uuidv4(),
       url: (form.elements.namedItem('url') as HTMLInputElement).value,
       title: (form.elements.namedItem('title') as HTMLInputElement).value,
       artist: (form.elements.namedItem('artist') as HTMLInputElement).value,
