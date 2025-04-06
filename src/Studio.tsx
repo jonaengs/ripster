@@ -12,7 +12,6 @@ export interface SongEntry {
 }
 
 function Studio() {
-
   const [entries, setEntries] = useLocalStorage<SongEntry[]>('entries', [])
   const [showSongInfo, setShowSongInfo] = useState(false)
 
